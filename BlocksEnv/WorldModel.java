@@ -7,12 +7,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 import java.util.logging.Logger;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
+import java.io.IOException;
+import java.lang.String;
 
 public class WorldModel extends GridWorldModel {
 
     public static final int   BLOCK = 32;
     public static final int   TABLE = 64;
-    private Logger            logger   = Logger.getLogger("BlocksWorld.mas2j." + WorldModel.class.getName());
+    private static Logger            logger   = Logger.getLogger("BlocksWorld.mas2j." + WorldModel.class.getName());
 
 
     private String                     id = "WorldModel";
@@ -97,57 +102,31 @@ public class WorldModel extends GridWorldModel {
     }
 
 
-    /** world with gold and obstacles */
-    static WorldModel world1() throws Exception {
+    static WorldModel world() throws Exception {
         GWidth =20;
         GHeight=10;
         WorldModel model = WorldModel.create(GWidth, GHeight, 0);
         model.names = new String[GWidth][GHeight];
 
-        Stack<String>  s1 = new Stack<String>();
-        //s1.addAll(Arrays.asList(new String[] {"table", "c", "b", "a"}));
-        s1.push("table");
-        s1.push("c");
-        s1.push("b");
-        s1.push("a");
-        model.stackList.add(s1);
-        Stack<String>  s2 = new Stack<String>();
-        s2.push("table");
-        s2.push("e");
-        s2.push("d");
-        model.stackList.add(s2);
-        Stack<String>  s3 = new Stack<String>();
-        s3.push("table");
-        s3.push("g");
-        s3.push("f");
-        model.stackList.add(s3);
-        model.modelToGrid();
-        return model;
-    }
-
-    static WorldModel world2() throws Exception {
-        GWidth =20;
-        GHeight=10;
-        WorldModel model = WorldModel.create(GWidth, GHeight, 0);
-        model.names = new String[GWidth][GHeight];
-        model.modelToGrid();
-        return model;
-    }
-
-    static WorldModel world3() throws Exception {
-        GWidth=50;
-        GHeight=10;
-        WorldModel model = WorldModel.create(GWidth, GHeight, 0);
-        model.names = new String[GWidth][GHeight];
-        model.modelToGrid();
-        return model;
-    }
-
-    static WorldModel world4() throws Exception {
-        GWidth =50;
-        GHeight=10;
-        WorldModel model = WorldModel.create(GWidth, GHeight, 0);
-        model.names = new String[GWidth][GHeight];
+        try (InputStream input = new FileInputStream("input-initial-configuration.properties")) {
+            Properties prop = new Properties();
+            prop.load(input);
+            prop.forEach((k, v) -> {
+            	Stack<String>  stack = new Stack<String>();
+            	stack.push("table");
+            	logger.info("push table");
+            	String[] blockLetters = v.toString().split("");
+            	for (String blockLetter : blockLetters) {
+            		logger.info("push letter \"" + blockLetter + "\"");
+            		stack.push(blockLetter);
+            	}
+                model.stackList.add(stack);
+            });
+        } catch (IOException ex) {
+        	throw new Exception(ex);
+        }
+        
+        
         model.modelToGrid();
         return model;
     }
